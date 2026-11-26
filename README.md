@@ -1,47 +1,44 @@
-# San Andrés Explorer — PWA React
+# San Andrés Explorer — PWA
 
-Aplicación web progresiva (PWA) responsive para iPhone, Android, tablets y computadores. Incluye guía turística local basada en reglas y conocimiento integrado; no utiliza APIs externas de inteligencia artificial.
+Guía turística instalable (PWA) para San Andrés Islas, hecha con React + Vite y conectada a Supabase.
 
-## Requisitos
-- Node.js 18 o superior.
-- npm.
+**Publicada en:** https://cashlessmot2026.github.io/guia/
 
-## Ejecutar en desarrollo
+## Pantallas
+Bienvenida · Inicio · Itinerarios · Mi Ruta (mapa satelital con recorrido parada por parada) · Negocios prioritarios · Detalle de negocio con reservas · Mi Viaje (favoritos, reservas, mapa offline, asistente) · Panel Admin.
+
+## Configurar la base de datos (una sola vez)
+1. Supabase → **SQL Editor** → pega todo `supabase/schema.sql` → **Run**.
+2. **Authentication → Users → Add user**: crea tu correo y contraseña (marca *Auto Confirm User*).
+3. En el SQL Editor ejecuta, con tu correo:
+   ```sql
+   insert into public.admins (user_id)
+   select id from auth.users where email = 'tu-correo@ejemplo.com'
+   on conflict do nothing;
+   ```
+4. En la app: menú ☰ → **Acceso administrador**.
+
+Mientras la base de datos no esté configurada, la app funciona con los datos incluidos en `src/data/seed.js`.
+
+## Desarrollo
 ```bash
 npm install
-npm run dev
+npm run dev      # servidor local
+npm run build    # versión de producción en dist/
 ```
-Abre la dirección local que muestra Vite. Para probar la instalación PWA en el teléfono, el equipo debe estar en la misma red o puedes desplegar el proyecto en un hosting HTTPS.
+Requiere Node.js 20.19 o superior.
 
-## Generar versión de producción
-```bash
-npm run build
-npm run preview
-```
-El resultado de producción queda en `dist/`.
+## Publicación
+Cada `git push` a `main` compila y publica automáticamente en GitHub Pages (`.github/workflows/deploy.yml`).
+En *Settings → Pages* la fuente debe ser **GitHub Actions**. También funciona en Vercel o Netlify (detectan Vite solos).
 
-## Instalar en cada dispositivo
-- **iPhone:** abre la URL publicada en Safari, toca Compartir y selecciona “Añadir a pantalla de inicio”. iOS no usa el mismo aviso automático de instalación que Android.
-- **Android:** abre la URL en Chrome y selecciona “Instalar aplicación” o “Añadir a pantalla principal”.
-- **PC:** abre la URL en Chrome o Edge y usa el icono de instalación de la barra de direcciones o el menú del navegador.
+## Dónde cambiar cosas
+| Qué | Archivo |
+| --- | --- |
+| URL y llave de Supabase | `src/config.js` (o variables en `.env`, ver `.env.example`) |
+| Datos de respaldo | `src/data/seed.js` |
+| Respuestas del asistente | `src/lib/agent.js` |
+| Estilos y colores | `src/styles.css` |
+| Instalación / modo offline | `public/manifest.webmanifest`, `public/sw.js` |
 
-La instalación PWA requiere servir la aplicación por HTTPS (excepto localhost). El service worker almacena la estructura básica de la aplicación para ayudar a abrirla sin conexión después de una primera visita. Las fotografías de las tarjetas se cargan desde Unsplash y requieren conexión para descargarse; la navegación real abre Google Maps.
-
-## Funciones incluidas
-- Inicio responsive con buscador, categorías, itinerarios y banners en carrusel.
-- Itinerarios prediseñados: esencial, historia raizal, aventura marina, vuelta a la isla y gastronomía.
-- Constructor de rutas personalizadas.
-- Seguimiento de paradas con botón “Cumplido”, porcentaje de avance y guía contextual.
-- Consejos de hidratación, sombra, protección solar y seguridad durante las paradas.
-- Mapa esquemático de las paradas; botones que abren búsqueda o recorrido en Google Maps.
-- Agente turístico local con respuestas basadas en conocimientos y reglas integrados en `src/App.jsx`.
-- Panel administrador para agregar negocios, activar/desactivar banners y asignar prioridades Premium, Prioritario, Normal y Básico.
-- Datos de ruta y negocios guardados en el dispositivo mediante `localStorage`.
-
-## Alcance del agente sin API
-El agente de esta versión es un asistente determinístico local: identifica temas y responde con la base turística y reglas incluidas en el código. No es un modelo generativo, no aprende automáticamente de conversaciones y no consulta clima, horarios, precios, disponibilidad ni cierres en tiempo real. Para mantener la información confiable, la aplicación pide confirmar horarios, acceso y condiciones del mar con operadores o sitios locales.
-
-## Personalización
-- Lugares, descripciones, itinerarios y respuestas del agente: `src/App.jsx`.
-- Diseño responsive, animaciones y colores: `src/styles.css`.
-- Configuración de instalación PWA: `public/manifest.webmanifest` y `public/sw.js`.
+La llave *publishable* de Supabase está pensada para ir en el navegador; la seguridad la dan las políticas RLS de `schema.sql` (los turistas solo leen y reservan; solo los administradores editan).
